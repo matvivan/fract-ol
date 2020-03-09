@@ -12,7 +12,7 @@
 
 NAME = fractol
 
-SRC = main.c
+SRC = main.c key_hook.c ft_fatou.c
 
 MLX = -LminiLibX/ -lmlx -framework OpenGL -framework AppKit
 
