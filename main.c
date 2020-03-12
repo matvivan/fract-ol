@@ -12,9 +12,9 @@
 
 #include "fractol.h"
 
-void				putpxl(t_pxl d, int x, int y, unsigned int color)
+void		putpxl(t_pxl d, int x, int y, unsigned int color)
 {
-	int				i;
+	int		i;
 
 	i = 0;
 	if (x >= 0 && x < d.size && y >= 0 && y < d.size)
@@ -28,35 +28,51 @@ void				putpxl(t_pxl d, int x, int y, unsigned int color)
 			++i;
 		}
 }
-
-int					main(int argc, char **argv) 
+ 
+int			valid_option(int ac, char *k)
 {
-	t_mlx			ptr;
-	t_pxl			data;
+	if (ac == 2 && k[0] == '-')
+		if (k[1] == 'K' || k[1] == 'B' || k[1] == 'J' || k[1] == 'M')
+			return (0);
+	return (1);
+}
 
-	if (argc == 2) {
-		ptr.mlx = mlx_init();
-		ptr.window = mlx_new_window(ptr.mlx, WIDTH, WIDTH, "Fract'matvivan");
-		ptr.image = mlx_new_image(ptr.mlx, WIDTH, WIDTH);
-		ptr.pxl = &data;
+int			main(int argc, char **argv) 
+{
+	t_mlx	ptr;
+	t_pxl	pxl;
+	t_pln	plane;
+	void	*v;
 
-		data.addr = mlx_get_data_addr(ptr.image, &data.bpp, &data.size, &data.end);
-		data.bpp /= 8;
-		data.size /= data.bpp;
-		fill(data, 1, 1, 1);
-		mlx_put_image_to_window(ptr.mlx, ptr.window, ptr.image, 0, 0);
-
-		mlx_mouse_hook(ptr.window, &mouse_hook, &ptr);
-		mlx_key_hook(ptr.window, &key_hook, &ptr);
-	//	mlx_hook(ptr.window, 6, 0, &plane, &ptr);
-		mlx_hook(ptr.window, 17, 0, (int (*)())&exit, NULL);
-		mlx_loop(ptr.mlx);
-		return (0);
+	if (valid_option(argc, argv[1])) {
+		ft_putstr("Usage: fractol [-option]\n\
+		\t -K Gustav Klimt art w/ fractals implemented into;\n\
+		\t -B execute Buddhabrot interpretation of Mandelbrot Set;\n\
+		\t -J execute Julia Set;\n\
+		\t -M execute Mandelbrot Set;\n");
+		return (1);
 	}
-	ft_putstr("Usage: fractol [option]\n									\
-	\t- 'Klimpt' Gustav art w/ fractals implemented into;\n					\
-	\t- 'Buddhabrot' execute Buddhabrot interpretation of Mandelbrot Set;\n \
-	\t- 'Julia' execute Julia Set;\n										\
-	\t- 'Mandelbrot' execute Mandelbrot Set;\n");
+	ptr.mlx = mlx_init();
+	ptr.window = mlx_new_window(ptr.mlx, WIDTH, WIDTH, "Fract'matvivan");
+	ptr.image = mlx_new_image(ptr.mlx, WIDTH, WIDTH);
+	v = mlx_new_image(ptr.mlx, 100, 100);
+
+	ptr.plane = &plane;
+	plane.init_x = -2;
+	plane.init_y = -2;
+	plane.scale = 4;
+	plane.max = 100;
+
+	ptr.pxl = &pxl;
+	pxl.addr = mlx_get_data_addr(ptr.image, &pxl.bpp, &pxl.size, &pxl.end);
+	pxl.bpp /= 8;
+	pxl.size /= pxl.bpp;
+
+	if (argv[1][1] == 'M')
+		mandelbrot(pxl, plane);
+	if (argv[1][1] == 'J')
+		motion_hook(500, 500, &ptr);
+	mlx_put_image_to_window(ptr.mlx, ptr.window, ptr.image, 0, 0);
+	init_hooks(&ptr, argv[1][1]);
 	return (0);
 }
